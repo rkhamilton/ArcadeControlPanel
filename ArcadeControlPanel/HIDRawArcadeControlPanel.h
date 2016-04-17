@@ -1,0 +1,93 @@
+/*
+Name:		HIDRawArcadeControlPanel.h
+Created:	4/4/2016 8:53:32 PM
+Author:	Ryan Hamilton, ryan.hamilton@gmail.com
+
+This class defines an interface for a collection of switches intended to control a MAME cabinet via bluetooth.
+Switches are debounced using https://github.com/t3db0t/Button
+HID Raw keyboard codes corresponding to active switches are assembled in cp.HIDCode
+
+Usage: 
+cp.update()
+if (cp.wasChanged()) {
+  sendToBlueTooth(cp.HIDCode);
+  }
+*/
+
+#ifndef _HIDRAWARCADECONTROLPANEL_h
+#define _HIDRAWARCADECONTROLPANEL_h
+
+#if defined(ARDUINO) && ARDUINO >= 100
+	#include "arduino.h"
+#else
+	#include "WProgram.h"
+#endif
+
+// using the debouncing forl of the button library from
+// https://github.com/t3db0t/Button
+// This is NOT the standard button library from the arduiono code playground
+#include <Button\Button.h>
+
+#define ARCADE_NUM_SWITCHES 18
+#define ARCADE_DEBOUNCE_DURATION 15 // milliseconds
+#define HID_CODES_SIZE 7
+
+class HIDRawArcadeControlPanel
+{
+ private:
+	byte _numSwitches = ARCADE_NUM_SWITCHES;
+	bool _wasChanged = false; // whether _HIDRawKeyCodes changed since the last call to HIDRawCodes()
+	Button buttons[ARCADE_NUM_SWITCHES] = {
+		Button(9,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // must be the Shift button
+		Button(6,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // menu / volume
+		Button(5,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), //  save / slot-
+		Button(3,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // load / slot+
+		Button(2,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), //  pause / exit
+		Button(11,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // coin
+		Button(10,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // player 1
+		Button(21,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // Y
+		Button(22,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // X
+		Button(15,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // LB
+		Button(19,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // A
+		Button(20,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // B
+		Button(23,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // C
+		Button(16,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // D
+		Button(12,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // U
+		Button(14,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // D
+		Button(0,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // L
+		Button(13,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION) // R
+	};
+	// codes corresponding to each switch being activated. keyboard key | MAME function I want to use
+	// codes from http://www.freebsddiary.org/APC/usb_hid_usages.php
+	byte _HIDRawKeyCodes[ARCADE_NUM_SWITCHES] = { 
+		0x02, // LeftShift modifier key - note this must always be the code for the shift button | must be the Shift button. Also note this is the MODIFIER, not the shift keypress (0xE1). This cost me time to realize...
+		0x10, // m | menu / volume
+		0x16, // s | save / slot-
+		0x12, // o | load / slot+
+		0x13, // p | pause / exit
+		0x22, // 5 | coin
+		0x1E, // 1 | player 1
+		0x1C, // y | Y
+		0x1B, // x | X
+		0x0F, // l | LB
+		0x04, // a | A
+		0x05, // b | B
+		0x06, // c | C
+		0x07, // d | D
+		0x52, // UP | U
+		0x51, // DOWN | D
+		0x50, // LEFT | L
+		0x4F // RIGHT | R
+	};
+
+ public:
+	HIDRawArcadeControlPanel();
+	void update(); // check all switch states
+	 // default HID code is no buttons pressed. Note 0xFD is the message start for HID Raw codes.
+	byte HIDCode[HID_CODES_SIZE] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; // shift key first, then up to six buttons pressed
+	// return true if HIDRawCodes changed since the last time wasChanged was called. If proc (process) is true, first update the control panel before returning results.
+	bool wasChanged(bool proc = true); 
+};
+
+#endif
+

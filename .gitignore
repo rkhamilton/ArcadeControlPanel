@@ -279,3 +279,11 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Visual Micro/
+*.atsln
+*.atsuo
+*.cppproj
+__vm/
+*.vcxproj
+*.vcxproj.filters
