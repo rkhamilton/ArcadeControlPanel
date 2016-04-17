@@ -14,17 +14,18 @@ void HIDRawArcadeControlPanel::update()
 	buttons[0].process();
 	// if anything changed since the last time the CP status was read, flag it
 	_wasChanged = _wasChanged || buttons[0].stateChanged(false);
+	// HIDCode must contain {0xFD, modifier_code, 0x00, key1, key2, key3, key4, key5, key6}
 	if (buttons[0].isPressed())
 	{
-		HIDCode[0] = _HIDRawKeyCodes[0];
+		HIDCode[1] = _HIDRawKeyCodes[0]; // modifier keys always go in the second entry of the HID raw code array (first entry must be 0xFD)
 	}
 	else
 	{
-		HIDCode[0] = 0x00;
+		HIDCode[1] = 0x00;
 	}
 	// now build message to bluetooth module for up to 6 other keypresses (Shift does not count)
 	// we can add key presses to the message in positions 3-8
-	byte msg_position = 1;
+	byte msg_position = 3;
 	// iterate over each button, skipping the first because that was Shift
 	for (size_t i = 1; i<ARCADE_NUM_SWITCHES; i++) {
 		// read the button value
