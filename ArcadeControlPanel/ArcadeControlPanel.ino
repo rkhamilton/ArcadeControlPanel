@@ -24,21 +24,6 @@
 
 HIDRawArcadeControlPanel cp = HIDRawArcadeControlPanel();
 
-// send HIDCodes to the ADafruit EZ-Key Bluetooth module via Serial1. Code from:
-// https://learn.adafruit.com/introducing-bluefruit-ez-key-diy-bluetooth-hid-keyboard/sending-keys-via-serial
-void keyCommand(uint8_t modifiers, uint8_t keycode1, uint8_t keycode2 = 0, uint8_t keycode3 = 0,
-	uint8_t keycode4 = 0, uint8_t keycode5 = 0, uint8_t keycode6 = 0) {
-	Serial1.write(0xFD);		// our command
-	Serial1.write(modifiers);	// modifier code
-	Serial1.write((byte)0x00);	// 0x00  
-	Serial1.write(keycode1);	// key code #1
-	Serial1.write(keycode2);	// key code #2
-	Serial1.write(keycode3);	// key code #3
-	Serial1.write(keycode4);	// key code #4
-	Serial1.write(keycode5);	// key code #5
-	Serial1.write(keycode6);	// key code #6
-}
-
 void setup() {
 	if (DEBUG_PRINT)
 	{
@@ -62,14 +47,10 @@ void loop() {
 			}
 			Serial.print("\n");
 		}
-		keyCommand(
-			cp.HIDCode[0], 
-			cp.HIDCode[1], 
-			cp.HIDCode[2], 
-			cp.HIDCode[3], 
-			cp.HIDCode[4], 
-			cp.HIDCode[5], 
-			cp.HIDCode[6]);
+		// send HIDCodes to the ADafruit EZ-Key Bluetooth module via Serial1. Based on:
+		// https://learn.adafruit.com/introducing-bluefruit-ez-key-diy-bluetooth-hid-keyboard/sending-keys-via-serial
+		Serial1.write(cp.HIDCode, HID_CODES_SIZE);
+		Serial1.flush();
 	}  
 }
 
