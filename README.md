@@ -84,7 +84,7 @@ class HIDRawArcadeControlPanel
 	};
 	// codes corresponding to each switch being activated. keyboard key | MAME function I want to use
 	// codes from http://www.freebsddiary.org/APC/usb_hid_usages.php
-	byte _HIDRawKeyCodes[ARCADE_NUM_SWITCHES] = { 
+	uint8_t _HIDRawKeyCodes[ARCADE_NUM_SWITCHES] = { 
 		0x02, // LeftShift modifier key - note this must always be the code for the shift button | must be the Shift button. Also note this is the MODIFIER, not the shift keypress (0xE1). This cost me time to realize...
 		0x10, // m | menu / volume
 		0x16, // s | save / slot-
@@ -109,7 +109,7 @@ class HIDRawArcadeControlPanel
 	HIDRawArcadeControlPanel();
 	void update(); // check all switch states
 	 // default HID code is no buttons pressed. Note 0xFD is the message start for HID Raw codes.
-	byte HIDCode[HID_CODES_SIZE] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; // shift key first, then up to six buttons pressed
+	uint8_t HIDCode[HID_CODES_SIZE] = { 0xFD, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; // HID Raw command array shift key first, then up to six buttons pressed
 	// return true if HIDRawCodes changed since the last time wasChanged was called. If proc (process) is true, first update the control panel before returning results.
 	bool wasChanged(bool proc = true); 
 };
@@ -135,14 +135,8 @@ void loop() {
 	// if any switches have changed, send them to the bluetooth module
 	if (cp.wasChanged(true))
 	{
-		keyCommand(
-			cp.HIDCode[0], 
-			cp.HIDCode[1], 
-			cp.HIDCode[2], 
-			cp.HIDCode[3], 
-			cp.HIDCode[4], 
-			cp.HIDCode[5], 
-			cp.HIDCode[6]);
+		Serial1.write(cp.HIDCode, HID_CODES_SIZE);
+		Serial1.flush();
 	}  
 }
 ```
