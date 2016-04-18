@@ -120,7 +120,7 @@ class HIDRawArcadeControlPanel
 
 I use the shift key in my control panel so that I can easily get double-duty out of my admin buttons (press pause to pause the game, shift-pause to exit back to the front end). I lost a little time figuring out that the HID key code for shift is 0xE1, but the modifier key code for shift is 0x02. We need the latter in sending the HID codes to the computer.
 
-In the main program the logic is very simple. The EZ-Key bluetooth device lists for serial commands that are sent via the arduino hardware UART (Serial1).
+In the main program the logic is very simple. The EZ-Key bluetooth device listens for serial commands that are sent via the arduino hardware UART (Serial1).
 
 ```c++
 HIDRawArcadeControlPanel cp = HIDRawArcadeControlPanel();
@@ -150,7 +150,7 @@ I also use, and highly recommend, the [Visual Micro](http://www.visualmicro.com/
 #Shopping List
 | Item  | Price  |
 |---|---|
-| wood - assorted poplar, with gunstock stain and polyurethane |   |
+| wood - assorted poplar, with gunstock stain and polyurethane | ~$15?  |
 | 7x [30mm goldleaf pushbuttons](http://www.ultimarc.com/store/product.php?xProd=171) | $1.95/ea  |
 | [30mm player 1 button](http://www.ultimarc.com/controls.html) | $1.40  |
 | [Ultimarc Mag-stik plus](http://www.ultimarc.com/store/section.php?xSec=6) | $37.00  |
