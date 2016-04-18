@@ -167,7 +167,7 @@ I also use, and highly recommend, the [Visual Micro](http://www.visualmicro.com/
 * I'm running the poly artwork right to the edge of the controller, and I'm concerned with how it will wear as things catch on the edge. It would probably be more robust to have the edges protectd by a raised edge peice, or covered by plastic.
 * I didn't have a router at the start of the project. Now that I know a bit how to use one, I would attach the wood edges uing a miter bit router to join wood edges. This would give it more of a "furniture" look where there are no exposed cut ends of the wood.
 * Get final panel art before drilling button holes to ensure perfect alignment with printed art.
-* I tried using a Feather 32u4 with integrated Bluetooth LE, but the driver support on Windows 10 and Raspbian are too sketchy and I couldn't get it to work. I ended up buying a the EZ-Key becauyse it's "only" Bluetooth 2.1, which is well supported.
+* I tried using a Feather 32u4 with integrated Bluetooth LE, but the driver support on Windows 10 and Raspbian are too sketchy and I couldn't get it to work. I ended up buying the EZ-Key becauyse it's "only" Bluetooth 2.1, which is well supported.
 
 #Acknowledgements
 * This project uses [Ted Hayes' Button.h library](https://github.com/t3db0t/Button), an improved version of the original Arduino button library by Alexander Brevig.
