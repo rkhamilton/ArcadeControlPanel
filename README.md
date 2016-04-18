@@ -1,7 +1,7 @@
 ArcadeControlPanel
 =======
 
-This project is a wireless [MAME](http://mamedev.org/) arcade control panel which emulates a bluetooth keyboard. A simple arduino microcontroller ([Adafruit Feather 32u4](https://www.adafruit.com/products/2771)) is wired to the panel controls, and wired to a bluetooth module that emulates a HID Keyboard ([Adafruit EZ-Key](https://www.adafruit.com/product/1535). I was thinking about building a full cabinet, but realized I live in a small house, and I prefer sitting on my couch to standing in front of a cabinet. I wanted to have a control panel that felt like an arcade cabinet that I could use from my couch.
+This project is a wireless [MAME](http://mamedev.org/) arcade control panel which emulates a bluetooth keyboard. A simple arduino microcontroller ([Adafruit Feather 32u4](https://www.adafruit.com/products/2771)) is wired to the panel controls, and wired to a bluetooth module that emulates a HID Keyboard ([Adafruit EZ-Key](https://www.adafruit.com/product/1535)). I was thinking about building a full cabinet, but realized I live in a small house, and I prefer sitting on my couch to standing in front of a cabinet. I wanted to have a control panel that felt like an arcade cabinet that I could use from my couch.
 
 ![ArcadeControlPanel](/images/finished.jpg)
 ![back side](/images/wired-all.jpg)
