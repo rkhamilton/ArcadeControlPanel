@@ -52,10 +52,10 @@ class HIDRawArcadeControlPanel
 		Button(20,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // B
 		Button(23,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // C
 		Button(16,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // D
-		Button(12,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // U
-		Button(14,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // D
-		Button(0,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // L
-		Button(13,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION) // R
+		Button(12,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // Up
+		Button(14,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // Down
+		Button(0,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // Left
+		Button(13,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION) // Right
 	};
 	// codes corresponding to each switch being activated. keyboard key | MAME function I want to use
 	// codes from http://www.freebsddiary.org/APC/usb_hid_usages.php
@@ -74,10 +74,10 @@ class HIDRawArcadeControlPanel
 		0x05, // b | B
 		0x06, // c | C
 		0x07, // d | D
-		0x52, // UP | U
-		0x51, // DOWN | D
-		0x50, // LEFT | L
-		0x4F // RIGHT | R
+		0x52, // UP | Up
+		0x51, // DOWN | Down
+		0x50, // LEFT | Left
+		0x4F // RIGHT | Right
 	};
 
  public:
