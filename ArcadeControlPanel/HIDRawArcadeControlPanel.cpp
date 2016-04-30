@@ -15,7 +15,7 @@ void HIDRawArcadeControlPanel::update()
 	// if anything changed since the last time the CP status was read, flag it
 	_wasChanged = _wasChanged || buttons[0].stateChanged(false);
 	// HIDCode must contain {0xFD, modifier_code, 0x00, key1, key2, key3, key4, key5, key6}
-	if (buttons[0].isPressed())
+	if (buttons[0].isPressed(false))
 	{
 		HIDCode[1] = _HIDRawKeyCodes[0]; // modifier keys always go in the second entry of the HID raw code array (first entry must be 0xFD)
 	}
@@ -32,7 +32,7 @@ void HIDRawArcadeControlPanel::update()
 		buttons[i].process();
 		// if anything changes since the last time the CP status was read, flag it
 		_wasChanged = _wasChanged || buttons[i].stateChanged(false);
-		if (buttons[i].isPressed()) {
+		if (buttons[i].isPressed(false)) {
 			HIDCode[msg_position] = _HIDRawKeyCodes[i];
 			msg_position++;
 			// Bluetooth module command messages for HID Raw codes are no more than 8 bytes   
