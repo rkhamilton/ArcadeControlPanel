@@ -10,9 +10,6 @@ For this project I was focused more on the mechanicals than on the electronics, 
 
 I'm writing this description aimed toward the MAME / emulation enthusiast, so I'll "over explain" some concepts.
 
-#Still Broken!
-Before you read further, note there's still a significant problem that I haven't fixed. The control panel registers clicks perfectly from all of the buttons, but many of the joystick movements are not registering. They're wired and coded exactly the same, so I think it must be due to the different microswitches used in the joystick. I've ordered some ultra light touch switches, similar to the buttons. Once I try that out I'll update the project if this fixes the problem. I think it may be that the debounce tuning needs to be very different for the heavy weight switches used in the joystick.
-
 #Control panel layout and art
 This is my first MAME build of any kind, so I did a lot of reading about example cabinets. An example of visual styling that I really liked was this bartop arcade by [floriske.nl]((http://forum.arcadecontrols.com/index.php/topic,123039.0.html)). I adjusted the action button layout based on examples at [slagcoin](http://www.slagcoin.com/joystick/layout.html). I printed out several layouts until I found one that I liked, then modified it to have seven buttons. 
 
@@ -80,10 +77,10 @@ class HIDRawArcadeControlPanel
 		Button(20,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // B
 		Button(23,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // C
 		Button(16,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // D
-		Button(12,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // U
-		Button(14,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // D
-		Button(0,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // L
-		Button(13,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION) // R
+		Button(12,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // Up
+		Button(14,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // Down
+		Button(0,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // Left
+		Button(13,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION) // Right
 	};
 	// codes corresponding to each switch being activated. keyboard key | MAME function I want to use
 	// codes from http://www.freebsddiary.org/APC/usb_hid_usages.php
@@ -102,10 +99,10 @@ class HIDRawArcadeControlPanel
 		0x05, // b | B
 		0x06, // c | C
 		0x07, // d | D
-		0x52, // UP | U
-		0x51, // DOWN | D
-		0x50, // LEFT | L
-		0x4F // RIGHT | R
+		0x52, // UP | Up
+		0x51, // DOWN | Down
+		0x50, // LEFT | Left
+		0x4F // RIGHT | Right
 	};
 
  public:
