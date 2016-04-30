@@ -46,6 +46,7 @@ void loop() {
 				Serial.print(cp.HIDCode[i], HEX);
 			}
 			Serial.print("\n");
+			Serial.flush();
 		}
 		// send HIDCodes to the ADafruit EZ-Key Bluetooth module via Serial1. Based on:
 		// https://learn.adafruit.com/introducing-bluefruit-ez-key-diy-bluetooth-hid-keyboard/sending-keys-via-serial
