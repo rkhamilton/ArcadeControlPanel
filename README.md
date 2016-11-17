@@ -50,7 +50,7 @@ I needed to output 3.3V from the regulator, so I needed at least 4.8V input powe
 I have the power regulator in series with a SPST switch to turn the whole thing off and on.
 
 #Code
-My control panel is emulating a keyboard. In order to handle multiple simultaneous key presses, one has to send HID raw USB codes. This limits you to six simultaneous key presses, plus modifiers (shift, control, etc). In my case, I'm using a shift key, plus up to six pressed buttons. You send a "keys pressed" command that indicates the active keys, and then later follow that up with a "no keys pressed" command (or a "different keys pressed" command). I.e., you don't continually send a signal when the key is pressed, you only signal on state change. This is described well by Adafruit in their [documentation](https://learn.adafruit.com/introducing-bluefruit-ez-key-diy-bluetooth-hid-keyboard) for the EZ-Key bluetooth module. I always enjoy buying from Adafruit because they provide such great documentation!
+My control panel is emulating a keyboard. In order to handle multiple simultaneous key presses, one has to send HID raw USB codes. This limits you to six simultaneous key presses, plus modifiers (shift, control, etc). In my case, I'm using a modifier key (labeled shift on the graphic), plus up to six pressed buttons. In my first version of this project I coded the shift button to use the actual shift keyboard modifier, but then learned that retroarch isn't case sensitive! Now pressing the shift button plus any other button actually sends a different key (e.g., "menu" sends "m" and "shift + menu" sends "v"). You send a "keys pressed" command that indicates the active keys, and then later follow that up with a "no keys pressed" command (or a "different keys pressed" command). I.e., you don't continually send a signal when the key is pressed, you only signal on state change. This is described well by Adafruit in their [documentation](https://learn.adafruit.com/introducing-bluefruit-ez-key-diy-bluetooth-hid-keyboard) for the EZ-Key bluetooth module. I always enjoy buying from Adafruit because they provide such great documentation!
 
 In order to accomplish a notification on state-change, I need the control panel to track when any button changes. The code consists of one class, which manages the collection of switches that make up the control panel. Each switch is controlled using a [Button class]((https://github.com/t3db0t/Button)) that includes software-based debounce. The button class has a wasChanged() method, so my control panel just sets up and traverses an array of buttons to see if any of them have changed. As the control panel class traverses this array, it also populates an array of bytes consisting of the HID raw key codes that describe the current state of the activated buttons (up to 6 buttons, per the USB HID limit). 
 
@@ -59,11 +59,11 @@ Within the control panel class, each button is mapped to a [HID raw code for a p
 ```c++
 class HIDRawArcadeControlPanel
 {
- private:
-	byte _numSwitches = ARCADE_NUM_SWITCHES;
+private:
+	uint8_t _numSwitches = ARCADE_NUM_SWITCHES;
 	bool _wasChanged = false; // whether _HIDRawKeyCodes changed since the last call to HIDRawCodes()
+	Button _ModifierButton = Button(9, BUTTON_PULLUP_INTERNAL, true, ARCADE_DEBOUNCE_DURATION); // must be the modifier (Shift) button
 	Button buttons[ARCADE_NUM_SWITCHES] = {
-		Button(9,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // must be the Shift button
 		Button(6,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // menu / volume
 		Button(5,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), //  save / slot-
 		Button(3,BUTTON_PULLUP_INTERNAL,true, ARCADE_DEBOUNCE_DURATION), // load / slot+
@@ -84,12 +84,31 @@ class HIDRawArcadeControlPanel
 	};
 	// codes corresponding to each switch being activated. keyboard key | MAME function I want to use
 	// codes from http://www.freebsddiary.org/APC/usb_hid_usages.php
-	uint8_t _HIDRawKeyCodes[ARCADE_NUM_SWITCHES] = { 
-		0x02, // LeftShift modifier key - note this must always be the code for the shift button | must be the Shift button. Also note this is the MODIFIER, not the shift keypress (0xE1). This cost me time to realize...
-		0x10, // m | menu / volume
-		0x16, // s | save / slot-
-		0x12, // o | load / slot+
-		0x13, // p | pause / exit
+	uint8_t _HIDRawKeyCodes[ARCADE_NUM_SWITCHES] = {
+		0x10, // m | menu
+		0x16, // s | save
+		0x12, // o | load
+		0x13, // p | pause
+		0x22, // 5 | coin
+		0x1E, // 1 | player 1
+		0x1C, // y | Y
+		0x1B, // x | X
+		0x0F, // l | LB
+		0x04, // a | A
+		0x05, // b | B
+		0x06, // c | C
+		0x07, // d | D
+		0x52, // UP | Up
+		0x51, // DOWN | Down
+		0x50, // LEFT | Left
+		0x4F // RIGHT | Right
+	};
+	// if _ModifierButton.isPressed then send the ALT code below instead
+	uint8_t _HIDRawKeyCodesALT[ARCADE_NUM_SWITCHES] = {
+		0x19, // v | volume
+		0x2D, // - | slot-
+		0x2E, // = | slot+
+		0x08, // e | exit
 		0x22, // 5 | coin
 		0x1E, // 1 | player 1
 		0x1C, // y | Y
@@ -105,17 +124,17 @@ class HIDRawArcadeControlPanel
 		0x4F // RIGHT | Right
 	};
 
- public:
+public:
 	HIDRawArcadeControlPanel();
 	void update(); // check all switch states
-	 // default HID code is no buttons pressed. Note 0xFD is the message start for HID Raw codes.
+				   // default HID code is no buttons pressed. Note 0xFD is the message start for HID Raw codes.
 	uint8_t HIDCode[HID_CODES_SIZE] = { 0xFD, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; // HID Raw command array shift key first, then up to six buttons pressed
-	// return true if HIDRawCodes changed since the last time wasChanged was called. If proc (process) is true, first update the control panel before returning results.
-	bool wasChanged(bool proc = true); 
+																								// return true if HIDRawCodes changed since the last time wasChanged was called. If proc (process) is true, first update the control panel before returning results.
+	bool wasChanged(bool proc = true);
 };
 ```
 
-I use the shift key in my control panel so that I can easily get double-duty out of my admin buttons (press pause to pause the game, shift-pause to exit back to the front end). I lost a little time figuring out that the HID key code for shift is 0xE1, but the modifier key code for shift is 0x02. We need the latter in sending the HID codes to the computer.
+I use the shift key in my control panel so that I can easily get double-duty out of my admin buttons (press pause to pause the game, shift-pause to exit back to the front end). It has been a pain to figure out how to get retropie to work properly with my admin keys, so I've uploaded my retroarch.cfg file as well.
 
 In the main program the logic is very simple. The EZ-Key bluetooth device listens for serial commands that are sent via the arduino hardware UART (Serial1).
 

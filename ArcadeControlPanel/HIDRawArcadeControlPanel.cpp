@@ -11,32 +11,30 @@ void HIDRawArcadeControlPanel::update()
 
 	// treat shift differently since it's a modifier key. Modifier key code goes in position 1, and does not count against our 6 total USB key presses
 	// because shift is different, we will be sure to access that with button position 0
-	buttons[0].process();
+	// when the shift key is pressed we will send a different key press for all keys. 
+	_ModifierButton.process();
 	// if anything changed since the last time the CP status was read, flag it
-	_wasChanged = _wasChanged || buttons[0].stateChanged(false);
-	// HIDCode must contain {0xFD, modifier_code, 0x00, key1, key2, key3, key4, key5, key6}
-	if (buttons[0].isPressed(false))
-	{
-		HIDCode[1] = _HIDRawKeyCodes[0]; // modifier keys always go in the second entry of the HID raw code array (first entry must be 0xFD)
-	}
-	else
-	{
-		HIDCode[1] = 0x00;
-	}
-	// now build message to bluetooth module for up to 6 other keypresses (Shift does not count)
+	_wasChanged = _wasChanged || _ModifierButton.stateChanged(false);
+
+	// build message to bluetooth module for up to 6 keypresses (Shift does not count)
 	// we can add key presses to the message in positions 3-8
 	byte msg_position = 3;
 	// iterate over each button, skipping the first because that was Shift
-	for (size_t i = 1; i<ARCADE_NUM_SWITCHES; i++) {
+	for (size_t i = 0; i<ARCADE_NUM_SWITCHES; i++) {
 		// read the button value
 		buttons[i].process();
 		// if anything changes since the last time the CP status was read, flag it
 		_wasChanged = _wasChanged || buttons[i].stateChanged(false);
 		if (buttons[i].isPressed(false)) {
-			HIDCode[msg_position] = _HIDRawKeyCodes[i];
+			if (_ModifierButton.isPressed(false)) {
+				HIDCode[msg_position] = _HIDRawKeyCodesALT[i];
+			}
+			else {
+				HIDCode[msg_position] = _HIDRawKeyCodes[i];
+			}
 			msg_position++;
 			// Bluetooth module command messages for HID Raw codes are no more than 8 bytes   
-			if (msg_position > HID_CODES_SIZE-1) break;
+			if (msg_position > HID_CODES_SIZE - 1) break;
 		}
 	}
 	// now that we've iterated over every button, the rest of the HID Raw codes should be filled with zeros
