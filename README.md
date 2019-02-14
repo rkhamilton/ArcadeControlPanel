@@ -10,19 +10,19 @@ For this project I was focused more on the mechanicals than on the electronics, 
 
 I'm writing this description aimed toward the MAME / emulation enthusiast, so I'll "over explain" some concepts.
 
-#Control panel layout and art
+# Control panel layout and art
 This is my first MAME build of any kind, so I did a lot of reading about example cabinets. An example of visual styling that I really liked was this bartop arcade by [floriske.nl]((http://forum.arcadecontrols.com/index.php/topic,123039.0.html)). I adjusted the action button layout based on examples at [slagcoin](http://www.slagcoin.com/joystick/layout.html). I printed out several layouts until I found one that I liked, then modified it to have seven buttons. 
 
 I did the panel layout in Adobe Illustrator. My [.ai layout file](/control_panel_art/control-panel.ai), and a [PDF version](/control_panel_art/control-panel.pdf), are in the panel design folder. I sent the design file in to [gameongrafix](http://www.gameongrafix.com/) to be printed on adhesive-backed polycarbonate. I'm really happy with the quality of the printed art, and I'd use them again. I'm running the poly artwork right to the edge of the controller, and I'm concerned with how it will wear as things catch on the edge. It would probably be more robust to have the edges protectd by a raised edge peice, or covered by plastic.
 
-#Buttons and Joystick
+# Buttons and Joystick
 I'm only planning to play classic MAME arcade games, so I didn't need analog controls. I selected the [Ultimarc Mag-stik plus](http://www.ultimarc.com/store/section.php?xSec=6) joystick because it lets you toggle from 4-way control to 8-way control by lifting up on the stick and twisting it 45 degrees. It's four times more expesive than a good 8-way non-adjustible joystick, but it seems like people like it.
 
 For buttons I went with 30mm leaf switches from ultimarc. My plan is the bottom four are for NeoGeo games, and the right-most six are for Street Fighter style buttons. I used some [16mm black pusbuttons from adafruit](https://www.adafruit.com/products/1505) for the admin buttons. I'm taking advantage of the fact that emulating a keyboard lets me use a shift key to get double-duty out of my admin buttons.
 
 The power toggle switch is a [simple SPST switch](https://www.sparkfun.com/products/11138).
 
-#Enclosure
+# Enclosure
 I'm a complete novice at woodworking, so I learned a lot building this, and I wouldn't necessarily do it the same way a second time. It's all 3/4" thick poplar. I started from the control panel layout and cut the top wood surface to match the needed dimensions. I printed out a [hole template](/images/hole-template.jpg) and drilled the wood so I could work on the panel components while I waited for the top artwork to be delivered. In the end the holes didn't line up perfectly, so if I were to do it over I'd be more patient and wait for the final printed art to arrive and use that as the template for drilling holes.
 
 The joystick cutout is routed down 1/8" to make room for the mounting plate. The buttons mounted directly to the wood, but the admin buttons are not tall enough to fully penetrate the wood. I ended up routing a channel halfway through the wood to make the admin button area thinner so that I could mount the admin buttons. I wanted smaller admin buttons, and I didn't readily find small diameter buttons that would pass through 3/4" paneling. In retrospect 1/2" panels would have worked fine.
@@ -34,22 +34,22 @@ I assembled the case with bronzed wood screws, sanded it all down, and applied s
 ![finish](/images/enclosure-finish.jpg)
 
 
-#Bluetooth
+# Bluetooth
 I'm using an [Adafruit EZ-Key](https://www.adafruit.com/product/1535) to connect to a Raspberry Pi 3 via Bluetooth 2.1. I tried using a [Adafruit Feather Bluefruit LE](https://learn.adafruit.com/adafruit-feather-32u4-bluefruit-le/overview) but I couldn't get the Pi to work with the newer Bluetooth LE device. It worked fine with the EZ-Key though. The LE device would have had less power consumption and more connectivity options to the arduino, but in the end the EZ Key works just fine.
 
 The EZ-Key is connected to the arduino in the simplest way possible. 3.3V power to my regulator, ground, and one wire to the arduino serial hardware TX on pin 1. I'm sending keypresses using the approach for "[sending keys via serial](https://learn.adafruit.com/introducing-bluefruit-ez-key-diy-bluetooth-hid-keyboard/sending-keys-via-serial)."
 
-#Latency
+# Latency
 The switch debounce is 15ms (most any switch has a lag in software or hardware to damp mechanical vibrations). HID keyaboard 8 byte key commands are sent from the arduino to the bluetooth module via UART serial at 9600 baud in about 7ms. Bluetooth lag ([according to Adafruit](https://learn.adafruit.com/introducing-bluefruit-ez-key-diy-bluetooth-hid-keyboard/faq)) is about 30ms. Total latency from button press to receipt by the arcade emulator hardware is then about 52ms
 
-#Power
+# Power
 The Feather has an integrated power regulator that would take battery input directly. However I couldn't tell if it was a switching regulator (power efficient) or linear regulator (uses more power and generates waste heat the higher your input voltage source). I happened to have some LM2596 switching regulators handy so I just used one of those. 
 ![LM2596 voltage regulator](/images/regulator.jpg)
 I needed to output 3.3V from the regulator, so I needed at least 4.8V input power so it could smooth and step it down to 3.3V. I also didn't know how much power this thing would draw so I just used two 3-battery AA battery holders wired in parallel (9V, 12000mAh, AKA "too much"). The power draw seems to be around 25 mA when powered on and idle, so this should run for 20 continuous days of use before I need to replace the (rechargable) AA batteries.
 
 I have the power regulator in series with a SPST switch to turn the whole thing off and on.
 
-#Code
+# Code
 My control panel is emulating a keyboard. In order to handle multiple simultaneous key presses, one has to send HID raw USB codes. This limits you to six simultaneous key presses, plus modifiers (shift, control, etc). In my case, I'm using a modifier key (labeled shift on the graphic), plus up to six pressed buttons. In my first version of this project I coded the shift button to use the actual shift keyboard modifier, but then learned that retroarch isn't case sensitive! Now pressing the shift button plus any other button actually sends a different key (e.g., "menu" sends "m" and "shift + menu" sends "v"). You send a "keys pressed" command that indicates the active keys, and then later follow that up with a "no keys pressed" command (or a "different keys pressed" command). I.e., you don't continually send a signal when the key is pressed, you only signal on state change. This is described well by Adafruit in their [documentation](https://learn.adafruit.com/introducing-bluefruit-ez-key-diy-bluetooth-hid-keyboard) for the EZ-Key bluetooth module. I always enjoy buying from Adafruit because they provide such great documentation!
 
 In order to accomplish a notification on state-change, I need the control panel to track when any button changes. The code consists of one class, which manages the collection of switches that make up the control panel. Each switch is controlled using a [Button class]((https://github.com/t3db0t/Button)) that includes software-based debounce. The button class has a wasChanged() method, so my control panel just sets up and traverses an array of buttons to see if any of them have changed. As the control panel class traverses this array, it also populates an array of bytes consisting of the HID raw key codes that describe the current state of the activated buttons (up to 6 buttons, per the USB HID limit). 
@@ -160,10 +160,10 @@ void loop() {
 }
 ```
 
-#Visual Studio / Visual Micro
+# Visual Studio / Visual Micro
 I also use, and highly recommend, the [Visual Micro](http://www.visualmicro.com/) plugin for Visual Studio. It doesn't seem to get a lot of discussion, but if you know how to program at all this is a great tool. You can use the full featured free "[Visual Studio Community Edition](https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx)" to write software, and this Visual Micro plugin brings full arduino support to the VS IDE. It even allows debugging! I don't know how people write code of any complexity with the stock Arduino editor.
 
-#Shopping List
+# Shopping List
 | Item  | Price  |
 |---|---|
 | wood - assorted poplar, with gunstock stain and polyurethane | ~$15?  |
@@ -179,13 +179,13 @@ I also use, and highly recommend, the [Visual Micro](http://www.visualmicro.com/
 | [LM2596-based switching voltage regulator, adjusted to 3.3V output](http://www.amazon.com/RioRand-LM2596-Converter-1-23V-30V-Pcs-LM2596) | $2 |
 
 
-#Lessons Learned
+# Lessons Learned
 * I'm running the poly artwork right to the edge of the controller, and I'm concerned with how it will wear as things catch on the edge. It would probably be more robust to have the edges protectd by a raised edge peice, or covered by plastic.
 * I didn't have a router at the start of the project. Now that I know a bit how to use one, I would attach the wood edges uing a miter bit router to join wood edges. This would give it more of a "furniture" look where there are no exposed cut ends of the wood.
 * Get final panel art before drilling button holes to ensure perfect alignment with printed art.
 * I tried using a Feather 32u4 with integrated Bluetooth LE, but the driver support on Windows 10 and Raspbian are too sketchy and I couldn't get it to work. I ended up buying the EZ-Key becauyse it's "only" Bluetooth 2.1, which is well supported.
 
-#Acknowledgements
+# Acknowledgements
 * This project uses [Ted Hayes' Button.h library](https://github.com/t3db0t/Button), an improved version of the original Arduino button library by Alexander Brevig.
 * Thanks to [Adafruit](https://www.adafruit.com) for their great, maker friendly hardware, documentation, and example code.
 * Thanks to floriske.nl for [posting his stylish bartop arcade](http://forum.arcadecontrols.com/index.php/topic,123039.0.html). The style of my custom graphics are heavily inspired by his design.
